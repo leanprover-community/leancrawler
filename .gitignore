@@ -1,0 +1,13 @@
+*.htm*
+__pycache__
+*.sw*
+*.db
+.coverage
+*.mypy_cache
+.pytest_cache
+.tox
+.python-version
+src/Lean_Crawler.egg-info/
+*.olean
+*.gephi
+*.gexf

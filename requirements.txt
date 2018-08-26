@@ -1,0 +1,4 @@
+peewee>=3.6.4
+networkx>=2.1
+pyyaml>=3.13
+regex>=2018.7.11

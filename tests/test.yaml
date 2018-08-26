@@ -1,0 +1,288 @@
+- Name: toto.rec_on
+  Line: 9
+  Type: definition
+  Uses: [toto.mk, toto]
+  Size: 137
+  Line: 17
+  Type: constant
+  Size: 4
+- Name: xnat.zero.sizeof_spec
+  Line: 23
+  Type: definition
+  Uses: [nat.has_one, has_one.one, xnat.zero, xnat.sizeof, nat, eq]
+  Size: 39
+- Name: toto.sizeof
+  Line: 9
+  Type: definition
+  Uses: [nat, toto]
+  Size: 289
+- Name: tata.fielda2
+  Line: 17
+  Type: structure_field
+  Parent: tata.mk
+  Uses: [tata]
+  Size: 32
+- Name: tata.no_confusion_type
+  Line: 17
+  Type: definition
+  Uses: [tata]
+  Size: 322
+- Name: toto.mk.inj
+  Line: 9
+  Type: definition
+  Uses: [and, toto.mk, toto, eq]
+  Size: 497
+- Name: tata.mk.inj_eq
+  Line: 17
+  Type: definition
+  Uses: [and, tata.mk, tata, eq]
+  Size: 1279
+  Line: 23
+  Type: constant
+  Size: 4
+- Name: xnat.zero.inj_eq
+  Line: 23
+  Type: definition
+  Uses: [true, xnat.zero, xnat, eq]
+  Size: 207
+- Name: xnat.zero.inj
+  Line: 23
+  Type: definition
+  Uses: [true, xnat.zero, xnat, eq]
+  Size: 53
+  Line: 9
+  Type: constant
+  Size: 4
+- Name: xnat.ibelow
+  Line: 23
+  Type: definition
+  Uses: [xnat]
+  Size: 135
+- Name: toto.has_sizeof_inst
+  Line: 9
+  Type: instance
+  Target: has_sizeof.{2}
+  Uses: [toto, has_sizeof]
+  Size: 34
+- Name: tata.no_confusion
+  Line: 17
+  Type: definition
+  Uses: [tata.no_confusion_type, eq, tata]
+  Size: 466
+- Name: xnat.no_confusion
+  Line: 23
+  Type: definition
+  Uses: [xnat.no_confusion_type, eq, xnat]
+  Size: 386
+  Line: 23
+  Type: constant
+  Size: 4
+- Name: tata
+  Line: 17
+  Type: structure
+  Fields: [fielda1, fielda2]
+  Size: 4
+- Name: xnat.succ.inj
+  Line: 23
+  Type: definition
+  Uses: [xnat.succ, eq, xnat]
+  Size: 195
+- Name: toto.no_confusion
+  Line: 9
+  Type: definition
+  Uses: [toto.no_confusion_type, eq, toto]
+  Size: 466
+- Name: xnat.rec_on
+  Line: 23
+  Type: definition
+  Uses: [xnat.succ, xnat.zero, xnat]
+  Size: 137
+- Name: toto.fieldo2
+  Line: 9
+  Type: structure_field
+  Parent: toto.mk
+  Uses: [toto]
+  Size: 32
+- Name: xnat.succ.sizeof_spec
+  Line: 23
+  Type: definition
+  Uses: [xnat.has_sizeof_inst, sizeof, nat.has_one, has_one.one, nat.has_add, has_add.add, xnat.succ, xnat.sizeof, nat, eq, xnat]
+  Size: 61
+- Name: xnat.sizeof
+  Line: 23
+  Type: definition
+  Uses: [nat, xnat]
+  Size: 168
+- Name: toto.fieldo1
+  Line: 9
+  Type: structure_field
+  Parent: toto.mk
+  Uses: [toto]
+  Size: 32
+- Name: tata.sizeof
+  Line: 17
+  Type: definition
+  Uses: [nat, tata]
+  Size: 289
+- Name: tata.has_sizeof_inst
+  Line: 17
+  Type: instance
+  Target: has_sizeof.{2}
+  Uses: [tata, has_sizeof]
+  Size: 34
+  Line: 23
+  Type: constant
+  Size: 4
+- Name: xnat.cases_on
+  Line: 23
+  Type: definition
+  Uses: [xnat.succ, xnat.zero, xnat]
+  Size: 159
+- Name: tata.rec_on
+  Line: 17
+  Type: definition
+  Uses: [tata.mk, tata]
+  Size: 137
+- Name: xnat
+  Line: 23
+  Type: inductive
+  Size: 4
+- Name: x
+  Line: 7
+  Type: definition
+  Uses: [nat]
+  Size: 70
+- Name: ex_toto
+  Line: 13
+  Type: instance
+  Target: toto
+  Uses: [toto]
+  Size: 16
+- Name: toto
+  Line: 9
+  Type: class
+  Fields: [fieldo1, fieldo2]
+  Size: 4
+- Name: tata.mk.sizeof_spec
+  Line: 17
+  Type: definition
+  Uses: [nat.has_one, has_one.one, tata.mk, tata.sizeof, nat, eq]
+  Size: 96
+- Name: toto.mk.sizeof_spec
+  Line: 9
+  Type: definition
+  Uses: [nat.has_one, has_one.one, toto.mk, toto.sizeof, nat, eq]
+  Size: 96
+- Name: toto.cases_on
+  Line: 9
+  Type: definition
+  Uses: [toto.mk, toto]
+  Size: 137
+- Name: xnat.binduction_on
+  Line: 23
+  Type: definition
+  Uses: [xnat.ibelow, xnat]
+  Size: 519
+- Name: xnat.zero.inj_arrow
+  Line: 23
+  Type: definition
+  Uses: [true, xnat.zero, xnat, eq]
+  Size: 101
+- Name: tata.cases_on
+  Line: 17
+  Type: definition
+  Uses: [tata.mk, tata]
+  Size: 137
+  Line: 9
+  Type: constant
+  Size: 4
+- Name: xnat.no_confusion_type
+  Line: 23
+  Type: definition
+  Uses: [xnat]
+  Size: 314
+- Name: two_plus_two
+  Line: 29
+  Type: theorem
+  Statement uses: [nat.has_one, has_one.one, bit0, nat.has_add, has_add.add, nat, eq]
+  Size: 0
+  Proof uses lemmas: [trivial, of_as_true]
+  and uses: [nat.decidable_eq, nat.has_one, has_one.one, bit0, nat.has_add, has_add.add, nat, eq]
+  Proof size: 538
+- Name: one_plus_one
+  Line: 27
+  Type: theorem
+  Statement uses: [bit0, nat.has_one, has_one.one, nat.has_add, has_add.add, nat, eq]
+  Size: 0
+  Proof uses lemmas: [trivial, of_as_true]
+  and uses: [nat.decidable_eq, bit0, nat.has_one, has_one.one, nat.has_add, has_add.add, nat, eq]
+  Proof size: 376
+- Name: xnat.succ.inj_arrow
+  Line: 23
+  Type: definition
+  Uses: [xnat.succ, eq, xnat]
+  Size: 160
+- Name: toto.mk.inj_arrow
+  Line: 9
+  Type: definition
+  Uses: [toto.mk, toto, eq]
+  Size: 518
+- Name: triv
+  Line: 5
+  Type: axiom
+  Uses: [true, eq]
+  Size: 4
+- Name: tata.mk.inj
+  Line: 17
+  Type: definition
+  Uses: [and, tata.mk, tata, eq]
+  Size: 497
+- Name: tata.fielda1
+  Line: 17
+  Type: structure_field
+  Parent: tata.mk
+  Uses: [tata]
+  Size: 32
+- Name: xnat.has_sizeof_inst
+  Line: 23
+  Type: instance
+  Target: has_sizeof.{1}
+  Uses: [xnat, has_sizeof]
+  Size: 34
+- Name: xnat.brec_on
+  Line: 23
+  Type: definition
+  Uses: [xnat.below, xnat]
+  Size: 834
+  Line: 17
+  Type: constant
+  Size: 4
+- Name: toto.no_confusion_type
+  Line: 9
+  Type: definition
+  Uses: [toto]
+  Size: 322
+- Name: xnat.succ.inj_eq
+  Line: 23
+  Type: definition
+  Uses: [xnat.succ, eq, xnat]
+  Size: 407
+- Name: tata.mk.inj_arrow
+  Line: 17
+  Type: definition
+  Uses: [tata.mk, tata, eq]
+  Size: 518
+- Name: ex_tata
+  Line: 21
+  Type: definition
+  Uses: [tata]
+  Size: 17
+- Name: z
+  Line: 3
+  Type: constant
+  Size: 4
+- Name: xnat.below
+  Line: 23
+  Type: definition
+  Uses: [xnat]
+  Size: 238
