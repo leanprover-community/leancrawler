@@ -4,7 +4,7 @@ This is a python library which gathers statistics and relational information
 about Lean libraries. It is at a very early experimental stage, with low
 efficiency and high code mess due to weak planning, but already usable for fun.
 
-## Installation
+## Installation
 
 You need Python 3.6 or later, and Lean 3.4. Make sure the python package
 manager `pip` is installed.  Clone this repository, go to its root directory
@@ -13,7 +13,7 @@ install `ipython` for interactive use. Alternatively, if you don't want to mess
 up with your global python environment, you can use a dedicated virtual
 environment, as explained below.
 
-### Optional: setting up a virtual python environment
+### Optional: setting up a virtual python environment
 Use `pip install --user virtualenvwrapper`, and add to your `.bashrc` something like:
 ```bash
 # Python virtualenvwrapper
