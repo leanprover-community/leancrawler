@@ -4,7 +4,7 @@ This is a python library which gathers statistics and relational information
 about Lean libraries. It is at a very early experimental stage, with low
 efficiency and high code mess due to weak planning, but already usable for fun.
 
-## Installation
+## Installation
 
 You need Python 3.6 or later, and Lean 3.4. Make sure the python package
 manager `pip` is installed.  Clone this repository, go to its root directory
@@ -13,7 +13,7 @@ install `ipython` for interactive use. Alternatively, if you don't want to mess
 up with your global python environment, you can use a dedicated virtual
 environment, as explained below.
 
-### Optional: setting up a virtual python environment
+### Optional: setting up a virtual python environment
 Use `pip install --user virtualenvwrapper`, and add to your `.bashrc` something like:
 ```bash
 # Python virtualenvwrapper
@@ -43,13 +43,22 @@ The go get some coffee, have a walk, take care of your family for a while.
 
 You can then count theorems using `LeanItemModel.select().where(LeanItemModel.kind=='theorem').count()`
 (you can replace `theorem` by `definition`, `instance`, `structure`, `constant`, `axiom`, or `inductive`).
+In order to find a declaration by name, say the quadratic reciprocity theorem, you can use 
+`qr=LeanItemModel.get(LeanItemModel.name=='zmodp.quadratic_reciprocity')[0]`.
 
 To get [networkx](https://networkx.github.io/documentation/stable/) graphs, you can type
-`from leancrawler import ItemGraph, nx` and then `g = ItemGraph.from_db(db)`. You can then export the graph, e.g. with
+`from leancrawler import ItemGraph, nx, db` and then `g = ItemGraph.from_db(db)`. You can then export the graph, e.g. with
 `nx.write_gexf(g, 'mathlib.gexf')` to export to [Gephi](https://gephi.org/).
 You can also explore the graph using networkx's API, for instance 
 `[x.name for x in nx.dag_longest_path(g)]` will show the longest path in the
 graph.
+
+In order to get the node corresponding to the database item `qr`, use `qr_node = g.nodes[qr]`.
+Next one can get the subgraph of all nodes leading to the quadratic reciprocity theorem using
+`qr_subgraph = g.subgraph(nx.ancestors(g, qr).add(qr))`. Of course one can further filter, e.g.
+`qr_subgraph = g.subgraph([node for node in nx.ancestors(g, qr).add(qr) if 'cast' not in node.name and 'coe' not in node.name])`
+removes all declaration whose name contains `coe` or `cat`.
+Such a subgraph can be exported using `nx.write_gexf` as above.
 
 ## Contributing
 
