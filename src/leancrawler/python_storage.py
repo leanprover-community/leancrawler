@@ -32,7 +32,7 @@ AUX_DEF_PREFIX = ('.rec', '.brec', '.brec_on', '.mk', '.rec_on', '.inj_on',
                   '.inj_eq', '.sizeof_spec', '.drec', '.dcases_on',
                   '.drec_on', '.below', '.ibelow', '.binduction_on',)
 
-TOOLCHAIN = Path.home()/'.elan/toolchains/3.4.1/'
+TOOLCHAIN = Path.home()/'.elan/toolchains/3.4.2/'
 
 
 class LeanRunner:
@@ -41,7 +41,7 @@ class LeanRunner:
 
     def run(self, path: Path, cwd: Path = None) -> str:
         logger.debug(f"Calling Lean at {self.exec_path} in {cwd} on {path}")
-        return subprocess.run(["lean", str(path)],
+        return subprocess.run(["lean", "-T500000", str(path)],
                               stderr=subprocess.PIPE,
                               encoding="utf-8", cwd=cwd).stderr
 
@@ -138,7 +138,7 @@ class LeanFile:
             return
         if ': error:' in lean_output:
             logger.warning('Lean pointed out an error.')
-        decls = sorted(yaml.load(lean_output),
+        decls = sorted(yaml.load(lean_output, Loader=yaml.FullLoader),
                        key=lambda x: (x["Line"] or 0, x["Type"]))
         for decl in decls:
             name = decl["Name"]
