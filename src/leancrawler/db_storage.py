@@ -24,7 +24,7 @@ class LeanLibModel(BaseModel):
     name = CharField(unique=True)
 
     @classmethod
-    def from_path(cls, name: str, path: Path):
+    def from_path(cls, name: str, path: Path, prelude: bool = False):
         """Get a LeanLibModel object from its path, fetching files either from
            database or source."""
         try:
@@ -36,9 +36,8 @@ class LeanLibModel(BaseModel):
         for lean_file_m in lean_lib_m.files:
             if not (path/lean_file_m.path).exists():
                 lean_file_m.delete().execute()
-        for dep in Path(__file__).parent.glob('deps.*'):
-            logger.debug(f"Will copy {dep} to {path}")
-            shutil.copy(dep, path)
+        #logger.debug(f"Will copy deps.lean to {path / 'src'}")
+        #shutil.copy(str(Path(__file__).parent / 'deps.lean'), path / 'src')
 
         for file_path in path.glob('**/*.lean'):
             if file_path.name == 'deps.lean':
@@ -59,11 +58,10 @@ class LeanLibModel(BaseModel):
                 needs_update = True
 
             if needs_update:
-                lean_file_m.read(path)
+                lean_file_m.read(path, prelude)
             else:
                 logger.debug(f"No need to update {rel_path}")
-        for dep in Path(__file__).parent.glob('deps.*'):
-            (path/dep.name).unlink()
+        #(path/'src'/'deps.lean').unlink()
         return lean_lib_m
 
     def to_py(self, path: Path) -> LeanLib:
@@ -80,11 +78,11 @@ class LeanFileModel(BaseModel):
     visited = DateTimeField(default=datetime.now)
     nb_lines = IntegerField(default=0)
 
-    def read(self, path: Path) -> None:
+    def read(self, path: Path, prelude: bool = False) -> None:
         logger.debug(f"LeanFileModel reading {path}")
         LeanItemModel.delete().where(LeanItemModel.leanfile == self)
         ImportModel.delete().where(ImportModel.importer == self)
-        lf = LeanFile.from_path(path/self.path, root=path)
+        lf = LeanFile.from_path(path/self.path, root=path, prelude=prelude)
         for imported in lf.imports:
             imp_path = imported.replace('.', '/') + '.lean'
             other_file_m = LeanFileModel.get_or_create(path=imp_path)[0]

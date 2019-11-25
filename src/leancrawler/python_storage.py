@@ -14,8 +14,8 @@ import regex
 import yaml
 
 logger = logging.getLogger("Lean Crawler")
-logger.setLevel(logging.DEBUG)
-# logger.setLevel(logging.INFO)
+#logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 if (logger.hasHandlers()):
     logger.handlers.clear()
 logger.addHandler(logging.StreamHandler())
@@ -26,7 +26,7 @@ idents = r'(?<names>(((?<name>[^ ]+)) *)+)'
 import_regex = regex.compile(r'import +' + idents)
 instance_regex = regex.compile(r'([^{]*).{')
 
-AUX_DEF_PREFIX = ('.rec', '.brec', '.brec_on', '.mk', '.rec_on', '.inj_on',
+AUX_DEF_SUFFIX = ('.rec', '.brec', '.brec_on', '.mk', '.rec_on', '.inj_on',
                   '.has_sizeof_inst', '.no_confusion_type', '.no_confusion',
                   '.cases_on', '.inj_arrow', '.sizeof', '.inj',
                   '.inj_eq', '.sizeof_spec', '.drec', '.dcases_on',
@@ -34,6 +34,8 @@ AUX_DEF_PREFIX = ('.rec', '.brec', '.brec_on', '.mk', '.rec_on', '.inj_on',
 
 TOOLCHAIN = Path.home()/'.elan/toolchains/3.4.2/'
 
+class LeanError(Exception):
+    pass
 
 class LeanRunner:
     def __init__(self, exec_path=TOOLCHAIN / 'bin/lean',) -> None:
@@ -66,6 +68,9 @@ class LeanItem:
         self.proof_depends = proof_depends or []
         self.instance_target = instance_target
 
+    def __repr__(self):
+        return str(self.name)
+
 
 class LeanFile:
     def __init__(self, path: Path = None, visited: datetime = None,
@@ -89,30 +94,36 @@ class LeanFile:
     def __contains__(self, key: str) -> bool:
         return key in self.items
 
+    def __repr__(self):
+        return str(list(self.items.keys()))
+
     def get(self, key: str, default: LeanItem = None) -> LeanItem:
         return self.items.get(key, default)
 
     @classmethod
-    def from_path(cls, path: Path, root: Path = None) -> 'LeanFile':
+    def from_path(cls, path: Path, root: Path = None, prelude: bool = False) -> 'LeanFile':
         """Builds a LeanFile object from a file path."""
         root = root or path.parent
         logger.info(f"Creating LeanFile from path {path}")
         with path.open(encoding="utf-8") as f:
-            lean_file = cls.from_stream(f, root)
+            lean_file = cls.from_stream(f, root, prelude)
         lean_file.path = path
         return lean_file
 
     @classmethod
-    def from_stream(cls, stream: TextIO, root: Path) -> 'LeanFile':
+    def from_stream(cls, stream: TextIO, root: Path, prelude: bool = False) -> 'LeanFile':
         """Builds a LeanFile object from a stream of lines, running Lean from
         root directory."""
         lean_file = cls()
         tmp_file = NamedTemporaryFile("w+t", encoding="utf-8", delete=False)
-        tmp_file.write("import deps\n")
+        if not prelude:
+            tmp_file.write("import deps\n")
         line_nb = 0
         for line in stream:
             line_nb += 1
             tmp_file.write(line)
+            if prelude and 'prelude' in line:
+                tmp_file.write("import deps\n")
 
             m = import_regex.match(line)
             if m:
@@ -125,8 +136,11 @@ class LeanFile:
         lean_file.nb_lines = line_nb
 
         lean_output = LeanRunner().run(Path(tmp_file.name), cwd=root)
-        Path(tmp_file.name).unlink()
         logger.debug(lean_output)
+        if ': error:' in lean_output:
+            logger.error('Lean pointed out an error.')
+            raise LeanError
+        Path(tmp_file.name).unlink()
         lean_file.parse_lean_output(lean_output)
         return lean_file
 
@@ -145,21 +159,24 @@ class LeanFile:
             kind = decl["Type"]
             line = decl["Line"]
             logger.debug(f"Parsing Lean ouput at: {name} ({kind})")
-            if name.endswith(AUX_DEF_PREFIX):
+            if name.endswith(AUX_DEF_SUFFIX):
                 logger.debug(f"Was aux def: {name}")
                 continue
             if kind == "structure_field":
                 parent = '.'.join(decl["Parent"].split('.')[:-1])
                 logger.debug(f"structure field: {name} added to {parent}")
-                self[parent].size += decl["Size"]
+                # self[parent].size += decl["Size"]
+                for use in decl['Uses']:
+                    if use != parent:
+                        self[parent].def_depends.append(use)
                 continue
 
             item = self[name] = LeanItem(kind, name, line_nb=line)
 
-            item.size = decl["Size"]
+            # item.size = decl["Size"]
             if kind in ['theorem', 'lemma']:
                 item.def_depends = decl["Statement uses"]
-                item.proof_size = decl["Proof size"]
+                # item.proof_size = decl["Proof size"]
                 item.proof_depends = decl["Proof uses lemmas"] + \
                     decl["and uses"]
             elif kind in ['definition', 'inductive', 'constant', 'axiom']:
@@ -172,6 +189,13 @@ class LeanFile:
             elif kind in ['structure', 'class']:
                 item.def_depends = decl.get("Uses", [])
                 item.fields = decl["Fields"]
+
+                # Detect structure extension
+                #for field in item.fields:
+                #    if field.startswith('to_'):
+                #        target = field[3:]
+                #        item.def_depends.append(target)
+
             else:
                 logger.warning(f"Dropping: {name}")
 

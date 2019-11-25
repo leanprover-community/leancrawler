@@ -1,6 +1,7 @@
 import networkx as nx
 
 from leancrawler import LeanItemModel, DependanceModel
+from leancrawler.python_storage import logger
 
 COLORS = {'theorem':   {'a': 1, 'r': 239, 'b': 66, 'g': 173},
           'lemma':   {'a': 1, 'r': 239, 'b': 66, 'g': 173},
@@ -32,4 +33,19 @@ class ItemGraph(nx.DiGraph):
                 continue
 
             graph.add_edge(dep.used, dep.user)
+        return graph
+
+    @classmethod
+    def from_py(cls, lean, **kwargs):
+        graph = cls(**kwargs)
+        for name, item in lean.items.items():
+            graph.add_node(name)
+            graph.nodes[name]['id'] = item.name
+            graph.nodes[name]['label'] = item.name
+            graph.nodes[name]['kind'] = item.kind
+            graph.nodes[name]['viz'] = {'color': COLORS[item.kind]}
+
+            for dep in item.def_depends + item.proof_depends:
+                if dep in lean:
+                    graph.add_edge(dep, name)
         return graph

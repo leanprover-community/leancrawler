@@ -44,7 +44,7 @@ do
         | some info := do trace "  Type: structure_field", trace $ "  Parent: " ++ to_string info.cname
         | none :=  trace  "  Type: definition"
         end,
-      trace ("  Uses: " ++ (to_string $ list_items decl.type)),
+      trace ("  Uses: " ++ (to_string $ list_items decl.type ++ list_items decl.value)),
       trace ("  Size: " ++ (to_string $ sizeof $ to_string decl.value))
 
   | (cnst _ _ _ _) := do

@@ -34,7 +34,7 @@ database storage in order to crawl once and then explore freely. Run `ipython`
 (or regular `python` if masochistic) and then try something like:
 
 ```python
-from leancrawler import LeanLibModel, create_db, Path
+from leancrawler import LeanLibModel, create_db, Path, LeanItemModel
 
 create_db('mathlib.db')
 LeanLibModel.from_path('mathlib', Path('/home/name/lean/mathlib/'))
@@ -44,7 +44,7 @@ The go get some coffee, have a walk, take care of your family for a while.
 You can then count theorems using `LeanItemModel.select().where(LeanItemModel.kind=='theorem').count()`
 (you can replace `theorem` by `definition`, `instance`, `structure`, `constant`, `axiom`, or `inductive`).
 In order to find a declaration by name, say the quadratic reciprocity theorem, you can use 
-`qr=LeanItemModel.get(LeanItemModel.name=='zmodp.quadratic_reciprocity')[0]`.
+`qr=LeanItemModel.get(LeanItemModel.name=='zmodp.quadratic_reciprocity')`.
 
 To get [networkx](https://networkx.github.io/documentation/stable/) graphs, you can type
 `from leancrawler import ItemGraph, nx, db` and then `g = ItemGraph.from_db(db)`. You can then export the graph, e.g. with
@@ -55,8 +55,8 @@ graph.
 
 In order to get the node corresponding to the database item `qr`, use `qr_node = g.nodes[qr]`.
 Next one can get the subgraph of all nodes leading to the quadratic reciprocity theorem using
-`qr_subgraph = g.subgraph(nx.ancestors(g, qr).add(qr))`. Of course one can further filter, e.g.
-`qr_subgraph = g.subgraph([node for node in nx.ancestors(g, qr).add(qr) if 'cast' not in node.name and 'coe' not in node.name])`
+`qr_subgraph = g.subgraph(nx.ancestors(g, qr).union(set([qr])))`. Of course one can further filter, e.g.
+`qr_subgraph = g.subgraph([node for node in nx.ancestors(g, qr).union(set([qr])) if 'cast' not in node.name and 'coe' not in node.name])`
 removes all declaration whose name contains `coe` or `cat`.
 Such a subgraph can be exported using `nx.write_gexf` as above.
 
