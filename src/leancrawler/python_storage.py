@@ -152,21 +152,28 @@ class LeanFile:
             return
         if ': error:' in lean_output:
             logger.warning('Lean pointed out an error.')
-        decls = sorted(yaml.load(lean_output, Loader=yaml.FullLoader),
+        decls = sorted(yaml.safe_load(lean_output),
                        key=lambda x: (x["Line"] or 0, x["Type"]))
         for decl in decls:
             name = decl["Name"]
+            # Now fight yaml.load which tried to be too clever
+            if name is True:
+                name = 'true'
+            elif name is False:
+                name = 'false'
             kind = decl["Type"]
             line = decl["Line"]
             logger.debug(f"Parsing Lean ouput at: {name} ({kind})")
             if name.endswith(AUX_DEF_SUFFIX):
                 logger.debug(f"Was aux def: {name}")
                 continue
+            uses = (decl.get("Uses", []) + decl.get("Type uses", []) + decl.get("Body uses", []) +
+                decl.get("Statement uses", []) + decl.get("Proof uses lemmas", []) + decl.get("and uses", []))
             if kind == "structure_field":
                 parent = '.'.join(decl["Parent"].split('.')[:-1])
                 logger.debug(f"structure field: {name} added to {parent}")
                 # self[parent].size += decl["Size"]
-                for use in decl['Uses']:
+                for use in uses:
                     if use != parent:
                         self[parent].def_depends.append(use)
                 continue
@@ -177,17 +184,16 @@ class LeanFile:
             if kind in ['theorem', 'lemma']:
                 item.def_depends = decl["Statement uses"]
                 # item.proof_size = decl["Proof size"]
-                item.proof_depends = decl["Proof uses lemmas"] + \
-                    decl["and uses"]
+                item.proof_depends = uses
             elif kind in ['definition', 'inductive', 'constant', 'axiom']:
-                item.def_depends = decl.get("Uses", [])
+                item.def_depends = uses
             elif kind == 'instance':
-                item.def_depends = decl.get("Uses", [])
+                item.def_depends = uses
                 target = decl["Target"]
                 m = instance_regex.match(target)
                 item.instance_target = m.group(1) if m else target
             elif kind in ['structure', 'class']:
-                item.def_depends = decl.get("Uses", [])
+                item.def_depends = uses
                 item.fields = decl["Fields"]
 
                 # Detect structure extension
@@ -198,6 +204,12 @@ class LeanFile:
 
             else:
                 logger.warning(f"Dropping: {name}")
+    
+    @classmethod
+    def from_yaml(cls, path: str) -> 'LeanFile':
+        lf = cls()
+        lf.parse_lean_output(Path(path).read_text())
+        return lf
 
 
 class LeanLib:
