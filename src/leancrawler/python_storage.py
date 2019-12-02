@@ -8,6 +8,7 @@ from pathlib import Path
 import subprocess
 from datetime import datetime
 import logging
+import pickle
 from tempfile import NamedTemporaryFile
 
 import regex
@@ -156,11 +157,6 @@ class LeanFile:
                        key=lambda x: (x["Line"] or 0, x["Type"]))
         for decl in decls:
             name = decl["Name"]
-            # Now fight yaml.load which tried to be too clever
-            if name is True:
-                name = 'true'
-            elif name is False:
-                name = 'false'
             kind = decl["Type"]
             line = decl["Line"]
             logger.debug(f"Parsing Lean ouput at: {name} ({kind})")
@@ -210,6 +206,15 @@ class LeanFile:
         lf = cls()
         lf.parse_lean_output(Path(path).read_text())
         return lf
+    
+    @staticmethod
+    def load_dump(name: str) -> 'LeanFile':
+        with open(name, 'rb') as f:
+            return pickle.load(f)
+        
+    def dump(self, name):
+        with open(name, 'wb') as f:
+            pickle.dump(self, f)
 
 
 class LeanLib:

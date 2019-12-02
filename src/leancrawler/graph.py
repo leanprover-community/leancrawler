@@ -3,8 +3,8 @@ import networkx as nx
 from leancrawler import LeanItemModel, DependanceModel
 from leancrawler.python_storage import logger, LeanFile
 
-COLORS = {'theorem':   {'a': 1, 'r': 239, 'b': 66, 'g': 173},
-          'lemma':   {'a': 1, 'r': 239, 'b': 66, 'g': 173},
+COLORS = {'theorem':   {'a': 1, 'r': 9, 'b': 200, 'g': 200},
+          'lemma':   {'a': 1, 'r': 9, 'b': 200, 'g': 200},
           'definition': {'a': 1, 'r': 9, 'b': 236, 'g': 173},
           'structure': {'a': 1, 'r': 9, 'b': 236, 'g': 173},
           'constant': {'a': 1, 'r': 9, 'b': 236, 'g': 173},
@@ -50,9 +50,12 @@ class ItemGraph(nx.DiGraph):
                     graph.add_edge(dep, name)
                 else:
                     stripped =  '.'.join(dep.split('.')[:-1])
-                    if stripped in lean:
+                    if stripped != name and stripped in lean:
                         graph.add_edge(stripped, name)
         return graph
 
     def component_of(self, key):
         return self.subgraph(nx.ancestors(self, key).union([key]))
+
+    def write(self, name: str):
+        nx.write_gexf(self, name)
