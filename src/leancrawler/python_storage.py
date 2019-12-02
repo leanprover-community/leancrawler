@@ -165,6 +165,8 @@ class LeanFile:
                 continue
             uses = (decl.get("Uses", []) + decl.get("Type uses", []) + decl.get("Body uses", []) +
                 decl.get("Statement uses", []) + decl.get("Proof uses lemmas", []) + decl.get("and uses", []))
+            size = decl.get('Size', 0) 
+            proof_size = decl.get('Proof size', 0)
             if kind == "structure_field":
                 parent = '.'.join(decl["Parent"].split('.')[:-1])
                 logger.debug(f"structure field: {name} added to {parent}")
@@ -172,14 +174,17 @@ class LeanFile:
                 for use in uses:
                     if use != parent:
                         self[parent].def_depends.append(use)
+                        self[parent].size += size
+                        self[parent].proof_size += proof_size
                 continue
 
             item = self[name] = LeanItem(kind, name, line_nb=line)
+            item.size = size
+            item.proof_size = proof_size
 
             # item.size = decl["Size"]
             if kind in ['theorem', 'lemma']:
                 item.def_depends = decl["Statement uses"]
-                # item.proof_size = decl["Proof size"]
                 item.proof_depends = uses
             elif kind in ['definition', 'inductive', 'constant', 'axiom']:
                 item.def_depends = uses

@@ -26,6 +26,7 @@ class ItemGraph(nx.DiGraph):
             graph.nodes[item]['id'] = item.name
             graph.nodes[item]['label'] = item.name
             graph.nodes[item]['kind'] = item.kind
+            graph.nodes[item]['size'] = item.size + item.proof_size
             graph.nodes[item]['viz'] = {'color': COLORS[item.kind]}
 
         for dep in DependanceModel.select():
