@@ -1,8 +1,8 @@
 # Lean crawler
 
 This is a python library which gathers statistics and relational information
-about Lean libraries. It is at a very early experimental stage, with low
-efficiency and high code mess due to weak planning, but already usable for fun.
+about Lean libraries. It is at a very early experimental stage, 
+but already usable for fun.
 
 ## Installation
 
@@ -29,36 +29,48 @@ install. Note that you can leave the environment by running `deactivate`.
 
 ## Usage
 
-Unless you explore a very small library, it is recommended to use the sqlite
-database storage in order to crawl once and then explore freely. Run `ipython`
-(or regular `python` if masochistic) and then try something like:
+You need to put `deps.lean` (which comes with leancrawler) somewhere
+Lean can find it. Then, inside a Lean file import the theory you are
+interested in as well as `deps.lean` and type the command
+`run_cmd print_all_content`. Redirect Lean's trace output to some YaML
+file, say by running in a terminal `lean my_file.lean 2> my_data.yaml`.
+This will take a while if you want to inspect a large theory.
+
+Then run `ipython` (or regular `python` if masochistic), and try something like:
 
 ```python
-from leancrawler import LeanLibModel, create_db, Path, LeanItemModel
+from leancrawler import LeanLib, LeanDeclGraph
 
-create_db('mathlib.db')
-LeanLibModel.from_path('mathlib', Path('/home/name/lean/mathlib/'))
+lib = LeanLib.from_yaml('My nice lib', 'my_data.yaml')
 ```
-The go get some coffee, have a walk, take care of your family for a while.
 
-You can then count theorems using `LeanItemModel.select().where(LeanItemModel.kind=='theorem').count()`
-(you can replace `theorem` by `definition`, `instance`, `structure`, `constant`, `axiom`, or `inductive`).
-In order to find a declaration by name, say the quadratic reciprocity theorem, you can use 
-`qr=LeanItemModel.get(LeanItemModel.name=='zmodp.quadratic_reciprocity')`.
+This will also take a noticable time, but much less than Lean's work
+above. You can save that work for later use by typing
+`lib.dump('my_py_data')` and retrieve it in a later python session using
+`lib = LeanLib.load_dump('my_py_data')`.
 
-To get [networkx](https://networkx.github.io/documentation/stable/) graphs, you can type
-`from leancrawler import ItemGraph, nx, db` and then `g = ItemGraph.from_db(db)`. You can then export the graph, e.g. with
-`nx.write_gexf(g, 'mathlib.gexf')` to export to [Gephi](https://gephi.org/).
+Then `lib` is basically a dictionary of whose keys are Lean names (as
+python strings) and values are `LeanDecl` which contain a bunch a
+informations about a Lean declaration. Try `lib['group']` to see what is
+stored about the `group` declaration from Lean's core library.
+
+One way of playing with the lib is to make a graph.
+
+```python
+G = LeanDeclGraph.from_lib(lib)
+```
+
+This graph will include lots of nodes coming from basic logic (like
+`eq`, `Exists`, etc.) which can be seen as noise. You can get rid of
+some of them using `G.prune_foundations()`.
+If you are interested only in nodes leading up to `group`, you can try
+`group_graph = G.component_of('group')`. Then you can export it as a
+gexf file using `group_graph.write('group.gexf')`.
+
+
 You can also explore the graph using networkx's API, for instance 
-`[x.name for x in nx.dag_longest_path(g)]` will show the longest path in the
+`[x.name for x in nx.dag_longest_path(G)]` will show the longest path in the
 graph.
-
-In order to get the node corresponding to the database item `qr`, use `qr_node = g.nodes[qr]`.
-Next one can get the subgraph of all nodes leading to the quadratic reciprocity theorem using
-`qr_subgraph = g.subgraph(nx.ancestors(g, qr).union(set([qr])))`. Of course one can further filter, e.g.
-`qr_subgraph = g.subgraph([node for node in nx.ancestors(g, qr).union(set([qr])) if 'cast' not in node.name and 'coe' not in node.name])`
-removes all declaration whose name contains `coe` or `cat`.
-Such a subgraph can be exported using `nx.write_gexf` as above.
 
 ## Contributing
 
@@ -74,7 +86,3 @@ if unsure how to ensure that. Then use `tox` to run tests and linting. If you on
 * run [PEP8](https://www.python.org/dev/peps/pep-0008/) linting: `tox -e flake8`
 
 Note that the testing setup is done, but currently there is only one trivial test.
-
-## How does it work?
-
-There are two main components. A Lean component, living in `deps.lean` uses Lean introspection capabilties to inspect the content of the current file. It spits out a [YaML](http://yaml.org/) file as the one in `tests/test.yaml`. In order to manually use it, you can import `deps` in a file and then use `#eval print_content` at the bottom. The python component does that on a temporary copy of each file it can find. This component is made of three parts. The module `python_storage` contains classes reading the YaML information and storing information in memory. Module `db_storage` stores this information in a SQLite database in order to save introspection time. Module `graph` creates a networkx graph from a database. Originally the design was meant to be less coupled, but I underestimated introspection time, changed my mind and created this mess.
