@@ -6,7 +6,7 @@ but already usable for fun.
 
 ## Installation
 
-You need Python 3.6 or later, and Lean 3.4. Make sure the python package
+You need Python 3.6 or later, and Lean 3.26. Make sure the python package
 manager `pip` is installed.  Clone this repository, go to its root directory
 and run `pip install .` (using `sudo` if needed). It's also recommended to
 install `ipython` for interactive use. Alternatively, if you don't want to mess
