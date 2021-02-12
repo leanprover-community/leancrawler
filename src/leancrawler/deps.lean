@@ -219,7 +219,7 @@ meta def print_content : tactic unit :=
 do curr_env ← get_env,
    let decls := curr_env.fold [] list.cons,
    let local_decls := decls.filter
-     (λ x, environment.in_current_file' curr_env (to_name x) && not (to_name x).is_internal),
+     (λ x, environment.in_current_file curr_env (to_name x) && not (to_name x).is_internal),
    local_decls.mmap' (print_item_crawl curr_env)
 
 meta def print_all_content : tactic unit :=
