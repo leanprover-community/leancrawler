@@ -67,21 +67,21 @@ class LeanDecl:
                    is_instance=d['Modifiers']['instance'],
                    is_recursor=d['Modifiers']['is_recursor'],
                    is_constructor=d['Modifiers']['is_constructor'],
-                   Type=d['Type'],
-                   type_uses_proofs=set(d['Type uses proofs']),
-                   type_uses_others=set(d['Type uses others']),
-                   type_size=d['Type size'],
-                   type_dedup_size=d['Type dedup size'],
-                   type_pp_size=d['Type pp size'],
-                   Value=d['Value'],
-                   value_uses_proofs=set(d['Value uses proofs']),
-                   value_uses_others=set(d['Value uses others']),
-                   value_size=d['Value size'],
-                   value_dedup_size=d['Value dedup size'],
-                   value_pp_size=d['Value pp size'],
-                   target_class=d['Target class'],
-                   parent=d['Parent'],
-                   fields=d['Fields'])
+                   Type=d.get('Type', ''),
+                   type_uses_proofs=set(d.get('Type uses proofs', [])),
+                   type_uses_others=set(d.get('Type uses others', [])),
+                   type_size=d.get('Type size', 0),
+                   type_dedup_size=d.get('Type dedup size', 0),
+                   type_pp_size=d.get('Type pp size', 0),
+                   Value=d.get('Value', ''),
+                   value_uses_proofs=set(d.get('Value uses proofs', [])),
+                   value_uses_others=set(d.get('Value uses others', [])),
+                   value_size=d.get('Value size', 0),
+                   value_dedup_size=d.get('Value dedup size', 0),
+                   value_pp_size=d.get('Value pp size', 0),
+                   target_class=d.get('Target class', 0),
+                   parent=d.get('Parent', ''),
+                   fields=d.get('Fields', None))
         if decl.is_structure_field:
             # Remove the trailing ".mk"
             decl.parent = strip_name(decl.parent)
@@ -190,6 +190,41 @@ class LeanLib:
         with open(name, 'wb') as f:
             pickle.dump(self, f)
 
+    def prune_foundations(self):
+        """ Remove items that are too dependant on foundations and artificially
+           create hubs. """
+        forbidden_file_part = ['logic', 'classical', 'meta', 'tactic']
+        forbidden_prefixes = ['has_', 'set.', 'quot.', 'quotient.']
+        remove = set()
+        for item in self:
+            for part in forbidden_file_part:
+                if part in item.filename:
+                    remove.add(item.name)
+            for prefix in forbidden_prefixes:
+                if item.name.startswith(prefix):
+                    remove.add(item.name)
+        for name in remove.union(set([
+                'eq', 'eq.refl', 'eq.mpr', 'eq.rec', 'eq.trans', 'eq.subst',
+                'eq.symm', 'eq_self_iff_true', 'eq.mp',
+                'ne', 'not', 'true', 'false', 'trivial', 'rfl',
+                'congr', 'congr_arg', 'propext', 'funext',
+                'and', 'and.intro', 'and.elim',
+                'or', 'or.inl', 'or.inr', 'or.elim',
+                'iff', 'iff.intro', 'iff.mp', 'iff.mpr', 'iff_true_intro',
+                'iff_self', 'iff.refl', 'iff.rfl',
+                'classical.choice', 'classical.indefinite_description',
+                'classical.some', 'nonempty',
+                'decidable', 'decidable_eq', 'decidable_rel',
+                'imp_congr_eq', 'forall_congr_eq',
+                'auto_param',
+                'Exists', 'Exists.intro', 'subtype', 'subtype.val',
+                'id_rhs',
+                'set', 'set.has_mem', 'set_of',
+                'prod', 'prod.fst', 'prod.snd', 'prod.mk',
+                'coe', 'coe_to_lift', 'coe_base', 'coe_fn', 'coe_sort', 'coe_t',
+                'coe_trans', 'quotient', 'quot'])):
+            self.items.pop(name, None)
+
 
 
 COLORS = {'theorem':   {'a': 1, 'r': 9, 'b': 200, 'g': 200},
@@ -241,29 +276,6 @@ class LeanDeclGraph(nx.DiGraph):
         for node, (x, y) in graphviz_layout(self, 'dot', root).items():
             self.nodes[node]['viz']['position'] = {'x': x, 'y': y, 'z': 0}
 
-    def prune_foundations(self):
-        """ Remove nodes that are too dependant on foundations and artificially
-           create hubs. """
-        self.remove_nodes_from([
-            'eq', 'eq.refl', 'eq.mpr', 'eq.rec', 'eq.trans', 'eq.subst',
-            'eq.symm', 'eq_self_iff_true', 'eq.mp',
-            'ne', 'not', 'true', 'false', 'trivial', 'rfl',
-            'congr', 'congr_arg', 'propext', 'funext',
-            'and', 'and.intro', 'and.elim',
-            'or', 'or.inl', 'or.inr', 'or.elim',
-            'iff', 'iff.intro', 'iff.mp', 'iff.mpr', 'iff_true_intro',
-            'iff_self', 'iff.refl', 'iff.rfl',
-            'classical.choice', 'classical.indefinite_description',
-            'classical.some', 'nonempty',
-            'decidable', 'decidable_eq', 'decidable_rel',
-            'imp_congr_eq',
-            'auto_param',
-            'Exists', 'Exists.intro', 'subtype', 'subtype.val',
-            'id_rhs',
-            'set', 'set.has_mem', 'set_of',
-            'prod', 'prod.fst', 'prod.snd', 'prod.mk',
-            'coe', 'coe_to_lift', 'coe_base', 'coe_fn', 'coe_sort', 'coe_t',
-            'coe_trans'])
 
     def component_of(self, key):
         """ The subgraph containing everything needed to define key. """
