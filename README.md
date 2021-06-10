@@ -62,15 +62,16 @@ G = LeanDeclGraph.from_lib(lib)
 
 This graph will include lots of nodes coming from basic logic (like
 `eq`, `Exists`, etc.) which can be seen as noise. You can get rid of
-some of them using `G.prune_foundations()`.
+some of them using `lib.prune_foundations()` before creating the graph.
 If you are interested only in nodes leading up to `group`, you can try
 `group_graph = G.component_of('group')`. Then you can export it as a
 gexf file using `group_graph.write('group.gexf')`.
 
 
 You can also explore the graph using networkx's API, for instance 
-`[x.name for x in nx.dag_longest_path(G)]` will show the longest path in the
-graph.
+`nx.dag_longest_path(G)` will show the longest path in the graph
+while `nx.shortest_path(gr, 'my_def', 'my_lemma')` will show the shortest
+path from `my_def` to `my_lemma`.
 
 ## Contributing
 
