@@ -6,6 +6,8 @@ from dataclasses import dataclass, field
 from typing import List, Dict, Optional, Set
 from copy import deepcopy
 import pickle
+import sys
+from pathlib import Path
 
 from yaml import safe_load
 import networkx as nx
@@ -242,7 +244,7 @@ COLORS = {'theorem':   {'a': 1, 'r': 9, 'b': 200, 'g': 200},
 class LeanDeclGraph(nx.DiGraph):
     """ A Lean declarations graph. """
     @classmethod
-    def from_lib(cls, lean: LeanLib, **kwargs) -> 'LeanDeclGraph':
+    def from_lib(cls, lean: LeanLib, types_only: bool = False, **kwargs) -> 'LeanDeclGraph':
         """ Creates a graph from a LeanLib object """
         graph = cls(**kwargs)
         lib = deepcopy(lean)
@@ -261,7 +263,7 @@ class LeanDeclGraph(nx.DiGraph):
             graph.nodes[name]['kind'] = item.user_kind
             graph.nodes[name]['viz'] = {'color': COLORS[item.user_kind]}
 
-            for dep in item.uses:
+            for dep in item.type_uses if types_only else item.uses:
                 if dep in lib:
                     graph.add_edge(dep, name)
                 else:
@@ -284,3 +286,29 @@ class LeanDeclGraph(nx.DiGraph):
     def write(self, name: str):
         """ Saves declaration graph in GEXF format in a file named name. """
         nx.write_gexf(self, name)
+
+def crawl():
+    """Command line utility"""
+    args = sys.argv
+    if len(args) == 1:
+        print("You need to provide a module using dot separated file names as "
+              "in the Lean import command.")
+        sys.exit(1)
+    elif len(args) == 2:
+        mod = args[1]
+        yaml_file = 'data.yaml'
+    elif len(args) == 3:
+        mod = args[1]
+        yaml_file = args[2]
+    else:
+        print("Too many arguments.")
+        sys.exit(1)
+
+    with open('crawl.lean', 'w') as out:
+        out.write(f'import {mod}\n')
+        with (Path(__file__).parent/'crawler.lean').open() as inp:
+            for line in inp:
+                out.write(line.replace('data.yaml', yaml_file))
+
+
+

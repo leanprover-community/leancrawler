@@ -6,7 +6,7 @@ but already usable for fun.
 
 ## Installation
 
-You need Python 3.6 or later, and Lean 3.26. Make sure the python package
+You need Python 3.6 or later, and Lean 3.26 or later. Make sure the python package
 manager `pip` is installed.  Clone this repository, go to its root directory
 and run `pip install .` (using `sudo` if needed). It's also recommended to
 install `ipython` for interactive use. Alternatively, if you don't want to mess
@@ -29,12 +29,16 @@ install. Note that you can leave the environment by running `deactivate`.
 
 ## Usage
 
-You need to put `deps.lean` (which comes with leancrawler) somewhere
-Lean can find it. Then, inside a Lean file import the theory you are
-interested in as well as `deps.lean` and type the command
-`run_cmd print_all_content`. Redirect Lean's trace output to some YaML
-file, say by running in a terminal `lean my_file.lean 2> my_data.yaml`.
-This will take a while if you want to inspect a large theory.
+Inside a valid Lean project folder, if you want to inspect the theory
+visible in `my_file.lean`, run `leancrawler my_file` (if `my_file` is not at
+the root of you project source then you can indicate a dot separated path, just
+as you would do when importing it in Lean). This will
+create a file `crawl.lean` in the current folder. Then you need to make sure
+you have up to date olean files for `my_file` and all its dependencies.
+Then you can run `lean --run crawl.lean`.
+This will take a while if you want to inspect a large theory. In the end you
+should have a new file called `data.yaml` (you can change this name by providing a
+second argument to the `leancrawler` invocation).
 
 Then run `ipython` (or regular `python` if masochistic), and try something like:
 
