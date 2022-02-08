@@ -7,7 +7,7 @@ __pycache__
 .pytest_cache
 .tox
 .python-version
-src/Lean_Crawler.egg-info/
+src/leancrawler.egg-info/
 *.olean
 *.gephi
 *.gexf

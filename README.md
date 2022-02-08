@@ -79,15 +79,13 @@ path from `my_def` to `my_lemma`.
 
 ## Contributing
 
-In order to setup a dev environment, run `pip install -r requirements_tests.txt`.
-You will probably want to install `leancrawler` in dev
-mode using `pip install -e .` (adding the `-e` switch compared to instructions
-above). You also need to make sure both python 3.6 and 3.7 are installed, since
-tests are run against both version. See [pyenv](https://github.com/pyenv/pyenv)
-if unsure how to ensure that. Then use `tox` to run tests and linting. If you only want to
-* test for python 3.6: `tox -e py36`
-* test for python 3.7: `tox -e py37`
-* run [static type checking](http://mypy-lang.org/): `tox -e mypy`
-* run [PEP8](https://www.python.org/dev/peps/pep-0008/) linting: `tox -e flake8`
+In order to setup a dev environment,
+make sure you have `poetry` installed: [poetry installation](https://python-poetry.org/docs/master/#installing-with-the-official-installer),
+You can then run `poetry shell; poetry install` to have a venv dev environment.
+Use `tox` inside your `poetry` shell to run tests and linting. If you only want to
+* test for python 3.7: `tox -e python3.7`
+* test for python 3.8: `tox -e python3.8`
+* run [static type checking](http://mypy-lang.org/): `mypy`
+* run [PEP8](https://www.python.org/dev/peps/pep-0008/) linting: `flake8`
 
 Note that the testing setup is done, but currently there is only one trivial test.
