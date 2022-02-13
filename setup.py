@@ -12,11 +12,11 @@ setup(
     description='A Lean prover library crawler',
     long_description=long_description,
     long_description_content_type="text/markdown",
-    packages=find_packages('src'),
-    package_dir={'': 'src'},
+    packages=find_packages(),
     package_data={
-        '': ['crawl.lean'],
+        'leancrawler': ['crawl.lean'],
     },
+    include_package_data=True,
     entry_points={
         "console_scripts": [
             "leancrawler = leancrawler.crawler:crawl",
@@ -24,6 +24,6 @@ setup(
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: Apache Software License",
-        "Operating System :: OS Independent"],
+        "Operating System :: OS Independent" ],
     python_requires='>=3.6',
     install_requires=['networkx >= 2.1', 'pyyaml >= 3.13', 'pydot >= 1.4.1'])
