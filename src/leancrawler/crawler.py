@@ -13,9 +13,11 @@ from yaml import safe_load
 import networkx as nx
 from networkx.drawing.nx_pydot import graphviz_layout
 
+
 def strip_name(name):
     """ Remove the last component of a Lean name."""
     return '.'.join(name.split('.')[:-1])
+
 
 # Lean names ending with the following are auxilliary definitions
 AUX_DEF_SUFFIX = ('.rec', '.brec', '.brec_on', '.mk', '.rec_on', '.inj_on',
@@ -23,6 +25,7 @@ AUX_DEF_SUFFIX = ('.rec', '.brec', '.brec_on', '.mk', '.rec_on', '.inj_on',
                   '.cases_on', '.inj_arrow', '.sizeof', '.inj',
                   '.inj_eq', '.sizeof_spec', '.drec', '.dcases_on',
                   '.drec_on', '.below', '.ibelow', '.binduction_on',)
+
 
 @dataclass
 class LeanDecl:
@@ -122,6 +125,7 @@ class LeanDecl:
     def __str__(self):
         return str(self.name)
 
+
 @dataclass
 class LeanLib:
     """ A Lean library, seen as a collection of Lean declarations."""
@@ -149,7 +153,7 @@ class LeanLib:
 
     @classmethod
     def from_yaml(cls, name: str, filename: str) -> 'LeanLib':
-        """ Create a Lean library from a name and a Lean-exported YaML file path. """
+        """Create a Lean lib from a name and a Lean-exported YaML filepath."""
         lib = cls(name)
         with open(filename, 'rb') as f:
             lean_output = f.read()
@@ -163,6 +167,7 @@ class LeanLib:
             parent.type_uses_others.update(decl.type_uses_others)
             parent.value_uses_proofs.update(decl.value_uses_proofs)
             parent.value_uses_others.update(decl.value_uses_others)
+
             def rself(s):
                 """ remove self from uses."""
                 s.difference_update(set([decl.parent]))
@@ -179,7 +184,6 @@ class LeanLib:
 
             lib[parent.name] = parent
         return lib
-
 
     @staticmethod
     def load_dump(name: str) -> 'LeanLib':
@@ -223,10 +227,9 @@ class LeanLib:
                 'id_rhs',
                 'set', 'set.has_mem', 'set_of',
                 'prod', 'prod.fst', 'prod.snd', 'prod.mk',
-                'coe', 'coe_to_lift', 'coe_base', 'coe_fn', 'coe_sort', 'coe_t',
-                'coe_trans', 'quotient', 'quot'])):
+                'coe', 'coe_to_lift', 'coe_base', 'coe_fn', 'coe_sort',
+                'coe_t', 'coe_trans', 'quotient', 'quot'])):
             self.items.pop(name, None)
-
 
 
 COLORS = {'theorem':   {'a': 1, 'r': 9, 'b': 200, 'g': 200},
@@ -244,7 +247,9 @@ COLORS = {'theorem':   {'a': 1, 'r': 9, 'b': 200, 'g': 200},
 class LeanDeclGraph(nx.DiGraph):
     """ A Lean declarations graph. """
     @classmethod
-    def from_lib(cls, lean: LeanLib, types_only: bool = False, **kwargs) -> 'LeanDeclGraph':
+    def from_lib(
+        cls, lean: LeanLib, types_only: bool = False, **kwargs
+    ) -> 'LeanDeclGraph':
         """ Creates a graph from a LeanLib object """
         graph = cls(**kwargs)
         lib = deepcopy(lean)
@@ -272,12 +277,10 @@ class LeanDeclGraph(nx.DiGraph):
                         graph.add_edge(stripped, name)
         return graph
 
-
     def layout(self, root):
         """ Slowly sets node positions using graphviz, with given root. """
         for node, (x, y) in graphviz_layout(self, 'dot', root).items():
             self.nodes[node]['viz']['position'] = {'x': x, 'y': y, 'z': 0}
-
 
     def component_of(self, key):
         """ The subgraph containing everything needed to define key. """
@@ -286,6 +289,7 @@ class LeanDeclGraph(nx.DiGraph):
     def write(self, name: str):
         """ Saves declaration graph in GEXF format in a file named name. """
         nx.write_gexf(self, name)
+
 
 def crawl():
     """Command line utility"""
@@ -309,6 +313,3 @@ def crawl():
         with (Path(__file__).parent/'crawler.lean').open() as inp:
             for line in inp:
                 out.write(line.replace('data.yaml', yaml_file))
-
-
-

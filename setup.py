@@ -24,6 +24,6 @@ setup(
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: Apache Software License",
-        "Operating System :: OS Independent" ],
+        "Operating System :: OS Independent"],
     python_requires='>=3.6',
     install_requires=['networkx >= 2.1', 'pyyaml >= 3.13', 'pydot >= 1.4.1'])
