@@ -110,7 +110,7 @@ class LeanDecl:
         return self.type_uses_others.union(self.type_uses_proofs)
 
     @property
-    def value_uses(self) -> List[str]:
+    def value_uses(self) -> Set[str]:
         """ Aggregated value declaration uses. """
         return self.value_uses_others.union(self.value_uses_proofs)
 
