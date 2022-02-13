@@ -67,6 +67,15 @@ G = LeanDeclGraph.from_lib(lib)
 This graph will include lots of nodes coming from basic logic (like
 `eq`, `Exists`, etc.) which can be seen as noise. You can get rid of
 some of them using `lib.prune_foundations()` before creating the graph.
+This function takes an optional argument `files` which is a list of substrings
+whose appearance in a declaration filename flags it for removal.
+For instance `lib.prune_foundations(files=['mathlib', 'elan'])` will remove
+any declaration from mathlib and the core library.
+Similarly, you can use the optional argument `prefixes` to indicate a list
+of declaration name prefixes to remove.
+For instance `lib.prune_foundations(prefixes=['list', 'set', 'finset'])` will remove
+any declaration whose name starts with either `list`, `set` or `finset`.
+
 If you are interested only in nodes leading up to `group`, you can try
 `group_graph = G.component_of('group')`. Then you can export it as a
 gexf file using `group_graph.write('group.gexf')`.

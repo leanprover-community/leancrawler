@@ -196,11 +196,15 @@ class LeanLib:
         with open(name, 'wb') as f:
             pickle.dump(self, f)
 
-    def prune_foundations(self):
+    def prune_foundations(self,
+                          files: Optional[List[str]] = None,
+                          prefixes: Optional[List[str]] = None):
         """ Remove items that are too dependant on foundations and artificially
            create hubs. """
-        forbidden_file_part = ['logic', 'classical', 'meta', 'tactic']
-        forbidden_prefixes = ['has_', 'set.', 'quot.', 'quotient.']
+        forbidden_file_part = ['logic', 'classical', 'meta', 'tactic'] +\
+            (files or [])
+        forbidden_prefixes = ['has_', 'set.', 'quot.', 'quotient.'] +\
+            (prefixes or [])
         remove = set()
         for item in self:
             for part in forbidden_file_part:
