@@ -51,9 +51,6 @@ meta def list_type_items (nm₀ : name) : tactic (list name) := do
   l₃ ← aux.mfold l₂ (λ nm l', list_items_aux nm₀ nm >>= λ l'', return (l'.union l'')),
   return l₃.to_list
 
-meta def list_items (e : expr) : list name :=
-e.list_constant'
-
 meta def mnot : bool → tactic bool := λ p, return (¬ p)
 
 meta def pos_line (p : option pos) : string :=
