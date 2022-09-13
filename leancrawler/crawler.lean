@@ -14,11 +14,45 @@ meta def expr.get_pi_app_fn : expr → expr
 | (expr.pi _ _ _ e) := e.get_pi_app_fn
 | e                 := e.get_app_fn
 
+namespace name_set
+meta def partition (P : name → bool) (s : name_set) : name_set × name_set :=
+s.fold (s, s) (λ a m, if P a then (m.1, m.2.erase a) else (m.1.erase a, m.2))
+end name_set
+
+/--
+`pre.list_items_aux nm` returns the list of names occuring in the declaration `nm` or (recusively)
+in any declarations occurring in the value of `nm` with namespace `pre`
+and whose last component starts with `_`.
+Auxiliary function for `list_items`. -/
+meta def list_items_aux (pre : name) : name → tactic name_set | nm := do
+  env ← get_env,
+  decl ← get_decl nm,
+  let l := decl.value.list_constant,
+  let (aux, l₂) := l.partition (λ nm : name, nm.get_prefix = pre ∧ nm.last.front = '_'),
+  aux.mfold l₂ (λ nm l', list_items_aux nm >>= λ l'', return (l'.union l''))
+
+/-- `list_value_items nm` returns the list of names occuring in the declaration `nm` or (recusively)
+in any declarations `nm._proof_i` (or to be more precise: any declaration in namespace `nm`
+whose last part of the name starts with `_`). -/
+meta def list_value_items (nm : name) : tactic (list name) := do
+  l ← list_items_aux nm nm,
+  return l.to_list
+  -- let l := l.to_list.map (λ nm : name, if nm.last.front = '_' then nm.get_prefix else nm),
+  -- return l.dedup
+
+/-- `list_value_items nm` returns the list of names occuring in the declaration `nm` or (recusively)
+in any declarations `nm._proof_i` (or to be more precise: any declaration in namespace `nm`
+whose last part of the name starts with `_`). -/
+meta def list_type_items (nm₀ : name) : tactic (list name) := do
+  env ← get_env,
+  decl ← get_decl nm₀,
+  let l := decl.type.list_constant,
+  let (aux, l₂) := l.partition (λ nm : name, nm.get_prefix = nm₀ ∧ nm.last.front = '_'),
+  l₃ ← aux.mfold l₂ (λ nm l', list_items_aux nm₀ nm >>= λ l'', return (l'.union l'')),
+  return l₃.to_list
+
 meta def list_items (e : expr) : list name :=
-e.fold [] $ λ e _ cs,
-if e.is_constant ∧ ¬ e.const_name ∈ cs
-  then e.const_name :: cs
-  else cs
+e.list_constant'
 
 meta def mnot : bool → tactic bool := λ p, return (¬ p)
 
@@ -95,15 +129,17 @@ do
 
    pp_type ← pp decl.type,
    let res := res ++  "  Type: " ++ (to_string pp_type).quote ++ "\n",
-   type_proofs ← (list_items decl.type).mfilter $ λ c, mk_const c >>= is_proof,
-   type_others ← (list_items decl.type).mfilter $ λ c, mk_const c >>= is_proof >>= mnot,
+   type_decls ← list_type_items name,
+   type_proofs ← type_decls.mfilter $ λ c, mk_const c >>= is_proof,
+   type_others ← type_decls.mfilter $ λ c, mk_const c >>= is_proof >>= mnot,
    let res := res ++  "  Type uses proofs: " ++ to_string type_proofs ++ "\n",
    let res := res ++  "  Type uses others: " ++ to_string type_others ++ "\n",
 
    pp_value ← pp decl.value,
    let res := res ++  "  Value: " ++ (to_string pp_value).quote ++ "\n",
-   value_proofs ← (list_items decl.value).mfilter $ λ c, mk_const c >>= is_proof,
-   value_others ← (list_items decl.value).mfilter $ λ c, mk_const c >>= is_proof >>= mnot,
+   value_decls ← list_value_items name,
+   value_proofs ← value_decls.mfilter $ λ c, mk_const c >>= is_proof,
+   value_others ← value_decls.mfilter $ λ c, mk_const c >>= is_proof >>= mnot,
    let res := res ++  "  Value uses proofs: " ++ to_string value_proofs ++ "\n",
    let res := res ++  "  Value uses others: " ++ to_string value_others ++ "\n",
 
