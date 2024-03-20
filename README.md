@@ -1,5 +1,7 @@
 # Lean crawler
 
+**Warning:** This tool is a Lean 3 tool, it has no relevance to today’s world. Using it makes sense only for paleontologists.  
+
 This is a python library which gathers statistics and relational information
 about Lean libraries. It is at a very early experimental stage, 
 but already usable for fun.
